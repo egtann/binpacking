@@ -36,20 +36,19 @@ func (rt RotationType) String() string {
 	return "wrong type"
 }
 
-type Box[T any] struct {
-	Item   T
-	Width  int // unit: mm
-	Height int // unit: mm
-	Depth  int // unit: mm
-	Weight int // unit: g
-
-	Items []BoxItem
+type Box struct {
+	Name   string
+	Width  int
+	Height int
+	Depth  int
+	Weight int
+	Items  []BoxItem
 }
 
-func (b Box[T]) String() string {
+func (b Box) String() string {
 	r := fmt.Sprintf(
-		"box (w: %d, h: %d, d: %d, weight: %d, item: %v) itemsCount: %d",
-		b.Width, b.Height, b.Depth, b.Weight, b.Item, len(b.Items),
+		"box (w: %d, h: %d, d: %d, weight: %d, name: %s) itemsCount: %d",
+		b.Width, b.Height, b.Depth, b.Weight, b.Name, len(b.Items),
 	)
 	for i, item := range b.Items {
 		r += fmt.Sprintf("\n  item %d: %s", i, item)
@@ -57,15 +56,15 @@ func (b Box[T]) String() string {
 	return r
 }
 
-func (b Box[T]) IsValid() bool {
+func (b Box) IsValid() bool {
 	return b.volume() != 0
 }
 
-func (b Box[T]) volume() int {
+func (b Box) volume() int {
 	return b.Width * b.Height * b.Depth
 }
 
-func (b Box[T]) TotalWeight() (w int) {
+func (b Box) TotalWeight() (w int) {
 	w += b.Weight
 	for _, item := range b.Items {
 		w += item.GetWeight()
@@ -73,7 +72,7 @@ func (b Box[T]) TotalWeight() (w int) {
 	return
 }
 
-func (b Box[T]) nonBoxItems() (r []Item) {
+func (b Box) nonBoxItems() (r []Item) {
 	for _, item := range b.Items {
 		r = append(r, item.Item)
 	}
@@ -144,29 +143,29 @@ func intersect(o1, o2 [2]int, x1, y1, x2, y2 int) bool {
 	return x < (x1+x2)/2 && y < (y1+y2)/2
 }
 
-func (bi BoxItem) Dimensions() (d []int) {
+func (bi BoxItem) Dimensions() (d [3]int) {
 	switch bi.RType {
 	case RT1:
-		d = []int{bi.GetWidth(), bi.GetHeight(), bi.GetDepth()}
+		d = [3]int{bi.GetWidth(), bi.GetHeight(), bi.GetDepth()}
 	case RT2:
-		d = []int{bi.GetHeight(), bi.GetWidth(), bi.GetDepth()}
+		d = [3]int{bi.GetHeight(), bi.GetWidth(), bi.GetDepth()}
 	case RT3:
-		d = []int{bi.GetHeight(), bi.GetDepth(), bi.GetWidth()}
+		d = [3]int{bi.GetHeight(), bi.GetDepth(), bi.GetWidth()}
 	case RT4:
-		d = []int{bi.GetDepth(), bi.GetHeight(), bi.GetWidth()}
+		d = [3]int{bi.GetDepth(), bi.GetHeight(), bi.GetWidth()}
 	case RT5:
-		d = []int{bi.GetDepth(), bi.GetWidth(), bi.GetHeight()}
+		d = [3]int{bi.GetDepth(), bi.GetWidth(), bi.GetHeight()}
 	case RT6:
-		d = []int{bi.GetWidth(), bi.GetDepth(), bi.GetHeight()}
+		d = [3]int{bi.GetWidth(), bi.GetDepth(), bi.GetHeight()}
 	}
 	return
 }
 
 type Item interface {
-	GetHeight() int // unit: mm
-	GetWidth() int  // unit: mm
-	GetDepth() int  // unit: mm
-	GetWeight() int // unit: g
+	GetHeight() int
+	GetWidth() int
+	GetDepth() int
+	GetWeight() int
 }
 
 type Items []Item
@@ -190,13 +189,13 @@ func (is Items) Swap(i int, j int) {
 //
 // The original algorithm is designed for identical bins but our requirements is made for
 // bins in various sizes
-func Pack[T any](allBoxes []Box[T], notPacked []Item) (boxes []Box[T], err error) {
+func Pack(allBoxes []Box, notPacked []Item) (boxes []Box, err error) {
 	sort.Sort(Items(notPacked))
 	for len(notPacked) > 0 {
 		toPack := notPacked
 		// notPacked = []Item{} // clear notPacked
 
-		currentBin := pickBox[T](allBoxes, toPack[0])
+		currentBin := pickBox(allBoxes, toPack[0])
 		if !currentBin.IsValid() {
 			err = fmt.Errorf(
 				"item too big: {width: %d, height: %d, depth: %d, weight: %d}",
@@ -218,7 +217,7 @@ func Pack[T any](allBoxes []Box[T], notPacked []Item) (boxes []Box[T], err error
 	return
 }
 
-func pack[T any](allBoxes []Box[T], currentBin *Box[T], toPack []Item, replaceBin bool) (notPacked []Item) {
+func pack(allBoxes []Box, currentBin *Box, toPack []Item, replaceBin bool) (notPacked []Item) {
 	if !currentBin.place(toPack[0], [3]int{}) {
 		if nbin := getBiggerBox(allBoxes, *currentBin); nbin.IsValid() {
 			*currentBin = nbin
@@ -270,7 +269,7 @@ func pack[T any](allBoxes []Box[T], currentBin *Box[T], toPack []Item, replaceBi
 	return
 }
 
-func (b *Box[T]) place(item Item, pos [3]int) (fit bool) {
+func (b *Box) place(item Item, pos [3]int) (fit bool) {
 	bi := BoxItem{Item: item, Pos: pos}
 	for i := 0; i < 6; i++ {
 		bi.RType = RotationType(i)
@@ -295,7 +294,7 @@ func (b *Box[T]) place(item Item, pos [3]int) (fit bool) {
 	return
 }
 
-func pickBox[T any](boxes []Box[T], item Item) Box[T] {
+func pickBox(boxes []Box, item Item) Box {
 	for _, b := range boxes {
 		if !b.place(item, [3]int{}) {
 			continue
@@ -303,10 +302,10 @@ func pickBox[T any](boxes []Box[T], item Item) Box[T] {
 		b.Items = []BoxItem{}
 		return b
 	}
-	return Box[T]{}
+	return Box{}
 }
 
-func getBiggerBox[T any](boxes []Box[T], box Box[T]) Box[T] {
+func getBiggerBox(boxes []Box, box Box) Box {
 	v := box.volume()
 	for _, b := range boxes {
 		if b.volume() > v {
@@ -314,5 +313,5 @@ func getBiggerBox[T any](boxes []Box[T], box Box[T]) Box[T] {
 		}
 	}
 
-	return Box[T]{}
+	return Box{}
 }

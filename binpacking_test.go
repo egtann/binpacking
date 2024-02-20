@@ -8,19 +8,19 @@ import (
 )
 
 func BenchmarkPack(b *testing.B) {
-	allBoxes := []Box[string]{
-		{Width: 220, Height: 160, Depth: 100, Weight: 110, Item: "Box1"},
-		{Width: 260, Height: 145, Depth: 145, Weight: 120, Item: "Box2"},
-		{Width: 270, Height: 185, Depth: 110, Weight: 140, Item: "Box3"},
-		{Width: 310, Height: 220, Depth: 140, Weight: 210, Item: "Box4"},
-		{Width: 300, Height: 210, Depth: 200, Weight: 250, Item: "Box5"},
-		{Width: 300, Height: 300, Depth: 130, Weight: 290, Item: "Box6"},
-		{Width: 370, Height: 270, Depth: 150, Weight: 300, Item: "Box7"},
-		{Width: 300, Height: 300, Depth: 250, Weight: 360, Item: "Box8"},
-		{Width: 470, Height: 280, Depth: 210, Weight: 400, Item: "Box9"},
-		{Width: 430, Height: 315, Depth: 200, Weight: 430, Item: "Box10"},
-		{Width: 330, Height: 330, Depth: 350, Weight: 500, Item: "Box11"},
-		{Width: 465, Height: 350, Depth: 370, Weight: 650, Item: "Box12"},
+	allBoxes := []Box{
+		{Width: 220, Height: 160, Depth: 100, Weight: 110, Name: "Box1"},
+		{Width: 260, Height: 145, Depth: 145, Weight: 120, Name: "Box2"},
+		{Width: 270, Height: 185, Depth: 110, Weight: 140, Name: "Box3"},
+		{Width: 310, Height: 220, Depth: 140, Weight: 210, Name: "Box4"},
+		{Width: 300, Height: 210, Depth: 200, Weight: 250, Name: "Box5"},
+		{Width: 300, Height: 300, Depth: 130, Weight: 290, Name: "Box6"},
+		{Width: 370, Height: 270, Depth: 150, Weight: 300, Name: "Box7"},
+		{Width: 300, Height: 300, Depth: 250, Weight: 360, Name: "Box8"},
+		{Width: 470, Height: 280, Depth: 210, Weight: 400, Name: "Box9"},
+		{Width: 430, Height: 315, Depth: 200, Weight: 430, Name: "Box10"},
+		{Width: 330, Height: 330, Depth: 350, Weight: 500, Name: "Box11"},
+		{Width: 465, Height: 350, Depth: 370, Weight: 650, Name: "Box12"},
 	}
 	items := []Item{
 		goods{20, 100, 30},
@@ -65,19 +65,19 @@ func (g goods) GetWeight() int {
 }
 
 func TestPack(t *testing.T) {
-	allBoxes := []Box[string]{
-		{Width: 220, Height: 160, Depth: 100, Weight: 110, Item: "Box1"},
-		{Width: 260, Height: 145, Depth: 145, Weight: 120, Item: "Box2"},
-		{Width: 270, Height: 185, Depth: 110, Weight: 140, Item: "Box3"},
-		{Width: 310, Height: 220, Depth: 140, Weight: 210, Item: "Box4"},
-		{Width: 300, Height: 210, Depth: 200, Weight: 250, Item: "Box5"},
-		{Width: 300, Height: 300, Depth: 130, Weight: 290, Item: "Box6"},
-		{Width: 370, Height: 270, Depth: 150, Weight: 300, Item: "Box7"},
-		{Width: 300, Height: 300, Depth: 250, Weight: 360, Item: "Box8"},
-		{Width: 470, Height: 280, Depth: 210, Weight: 400, Item: "Box9"},
-		{Width: 430, Height: 315, Depth: 200, Weight: 430, Item: "Box10"},
-		{Width: 330, Height: 330, Depth: 350, Weight: 500, Item: "Box11"},
-		{Width: 465, Height: 350, Depth: 370, Weight: 650, Item: "Box12"},
+	allBoxes := []Box{
+		{Width: 220, Height: 160, Depth: 100, Weight: 110, Name: "Box1"},
+		{Width: 260, Height: 145, Depth: 145, Weight: 120, Name: "Box2"},
+		{Width: 270, Height: 185, Depth: 110, Weight: 140, Name: "Box3"},
+		{Width: 310, Height: 220, Depth: 140, Weight: 210, Name: "Box4"},
+		{Width: 300, Height: 210, Depth: 200, Weight: 250, Name: "Box5"},
+		{Width: 300, Height: 300, Depth: 130, Weight: 290, Name: "Box6"},
+		{Width: 370, Height: 270, Depth: 150, Weight: 300, Name: "Box7"},
+		{Width: 300, Height: 300, Depth: 250, Weight: 360, Name: "Box8"},
+		{Width: 470, Height: 280, Depth: 210, Weight: 400, Name: "Box9"},
+		{Width: 430, Height: 315, Depth: 200, Weight: 430, Name: "Box10"},
+		{Width: 330, Height: 330, Depth: 350, Weight: 500, Name: "Box11"},
+		{Width: 465, Height: 350, Depth: 370, Weight: 650, Name: "Box12"},
 	}
 	items := []Item{
 		goods{1, 20, 100, 30},
@@ -88,7 +88,7 @@ func TestPack(t *testing.T) {
 		goods{6, 100, 100, 30},
 		goods{7, 100, 100, 30},
 	}
-	want := []Box[string]{allBoxes[0]}
+	want := []Box{allBoxes[0]}
 	want[0].Items = []BoxItem{
 		{Item: items[5], RType: 0, Pos: [3]int{0, 0, 0}},
 		{Item: items[6], RType: 0, Pos: [3]int{100, 0, 0}},
@@ -109,7 +109,7 @@ func TestPack(t *testing.T) {
 	}
 }
 
-func printBoxes[T any](boxes []Box[T]) (r string) {
+func printBoxes(boxes []Box) (r string) {
 	for i, box := range boxes {
 		r += fmt.Sprintln("box", i, box.Width, box.Height, box.Depth, len(box.Items))
 		for i, item := range box.Items {
